@@ -12,6 +12,21 @@
     return React.createElement(type, props || null, ...children);
   }
 
+  function errorToMessage(err) {
+    if (!err) return "未知错误";
+    if (typeof err === "string") return err;
+    if (err.detail) return String(err.detail);
+    if (err.message) return String(err.message);
+    if (err.status || err.statusText) {
+      return ["请求失败", err.status, err.statusText].filter(Boolean).join(" ");
+    }
+    try {
+      return JSON.stringify(err);
+    } catch (_jsonErr) {
+      return String(err) || "未知错误";
+    }
+  }
+
   async function requestJSON(path, options) {
     const authedPath = API_BASE + path;
     if (typeof SDK.fetchJSON === "function") {
@@ -136,7 +151,7 @@
         setConfig(data);
         setError("");
       } catch (err) {
-        setError(err.message || String(err));
+        setError(errorToMessage(err));
       }
     }, []);
 
@@ -161,7 +176,7 @@
             setNotice("");
           }
         } catch (err) {
-          setError(err.message || String(err));
+          setError(errorToMessage(err));
           setItems([]);
         } finally {
           setLoading(false);
@@ -207,7 +222,7 @@
         anchor.remove();
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       } catch (err) {
-        setError(err.message || String(err));
+        setError(errorToMessage(err));
       }
     }
 
@@ -233,11 +248,13 @@
         setNotice("已删除：" + item.name);
         loadFiles(currentPath, query, includeHidden);
       } catch (err) {
-        setError(err.message || String(err));
+        setError(errorToMessage(err));
       }
     }
 
     const breadcrumbs = breadcrumbTargets(currentPath);
+    const configWarning =
+      config && !config.exists ? "当前根目录不存在：" + config.root : "";
 
     return h(
       "div",
@@ -294,11 +311,11 @@
           )
         )
       ),
-      (error || notice) &&
+      (error || notice || configWarning) &&
         h(
           "div",
-          { className: error ? "fp-message fp-error" : "fp-message" },
-          error || notice
+          { className: error || configWarning ? "fp-message fp-error" : "fp-message" },
+          error || configWarning || notice
         ),
       h(
         "div",

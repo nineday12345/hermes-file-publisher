@@ -36,6 +36,7 @@ def _configured_root() -> Path:
     candidates.extend(
         [
             Path("/data"),
+            Path("/opt/data"),
             Path.cwd() / "data",
             Path.home() / ".hermes" / "data",
         ]

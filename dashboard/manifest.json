@@ -3,7 +3,7 @@
   "label": "文件",
   "description": "Browse, download, copy links, and delete generated files on the server.",
   "icon": "FileText",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "tab": {
     "path": "/files",
     "position": "end",

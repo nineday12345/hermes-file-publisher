@@ -62,8 +62,9 @@ HERMES_FILE_PUBLISHER_RECURSIVE_DELETE=0
 3. `HERMES_DATA_DIR`
 4. `$HERMES_HOME/data`
 5. `/data`
-6. `./data`
-7. `~/.hermes/data`
+6. `/opt/data`
+7. `./data`
+8. `~/.hermes/data`
 
 ## 使用
 

@@ -1,5 +1,11 @@
 .fp-page {
-  color: var(--color-foreground, var(--foreground, #f4f4f5));
+  --fp-border: rgba(148, 163, 184, 0.32);
+  --fp-danger: #ef4444;
+  --fp-muted: rgba(244, 244, 245, 0.68);
+  --fp-primary: #14b8a6;
+  --fp-surface: rgba(24, 24, 27, 0.68);
+  --fp-text: #f4f4f5;
+  color: var(--fp-text);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -30,7 +36,7 @@
 }
 
 .fp-root {
-  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 70%, transparent);
+  color: var(--fp-muted);
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
   max-width: min(64vw, 760px);
@@ -47,10 +53,10 @@
 }
 
 .fp-input {
-  background: color-mix(in srgb, var(--color-card, var(--background, #020617)) 86%, white);
-  border: 1px solid color-mix(in srgb, var(--color-border, var(--border, #334155)) 80%, transparent);
+  background: var(--fp-surface);
+  border: 1px solid var(--fp-border);
   border-radius: 8px;
-  color: var(--color-foreground, var(--foreground, #e5e7eb));
+  color: var(--fp-text);
   font-size: 13px;
   height: 34px;
   outline: none;
@@ -58,7 +64,7 @@
 }
 
 .fp-input:focus {
-  border-color: var(--color-ring, var(--ring, #38bdf8));
+  border-color: var(--fp-primary);
 }
 
 .fp-search {
@@ -78,10 +84,10 @@
 .fp-button,
 .fp-icon-button {
   align-items: center;
-  background: color-mix(in srgb, var(--primary, #14b8a6) 16%, transparent);
-  border: 1px solid color-mix(in srgb, var(--primary, #14b8a6) 46%, transparent);
+  background: rgba(20, 184, 166, 0.14);
+  border: 1px solid rgba(20, 184, 166, 0.52);
   border-radius: 8px;
-  color: var(--color-foreground, var(--foreground, #e5e7eb));
+  color: var(--fp-text);
   display: inline-flex;
   height: 34px;
   justify-content: center;
@@ -90,12 +96,12 @@
 
 .fp-button:hover,
 .fp-icon-button:hover {
-  background: color-mix(in srgb, var(--primary, #14b8a6) 26%, transparent);
+  background: rgba(20, 184, 166, 0.24);
 }
 
 .fp-check {
   align-items: center;
-  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 82%, transparent);
+  color: var(--fp-text);
   display: inline-flex;
   font-size: 13px;
   gap: 6px;
@@ -103,7 +109,7 @@
 }
 
 .fp-breadcrumbs {
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border, var(--border, #334155)) 72%, transparent);
+  border-bottom: 1px solid var(--fp-border);
   flex-wrap: wrap;
   padding-bottom: 8px;
 }
@@ -111,7 +117,7 @@
 .fp-link,
 .fp-name {
   background: transparent;
-  color: var(--primary, #14b8a6);
+  color: var(--fp-primary);
   padding: 0;
 }
 
@@ -121,25 +127,27 @@
 }
 
 .fp-separator {
-  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 40%, transparent);
+  color: var(--fp-muted);
 }
 
 .fp-message {
-  background: color-mix(in srgb, var(--primary, #14b8a6) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--primary, #14b8a6) 24%, transparent);
+  background: rgba(20, 184, 166, 0.12);
+  border: 1px solid rgba(20, 184, 166, 0.28);
   border-radius: 8px;
-  color: var(--color-foreground, var(--foreground, #e5e7eb));
+  color: var(--fp-text);
   font-size: 13px;
   padding: 9px 10px;
+  white-space: pre-wrap;
 }
 
 .fp-error {
-  background: color-mix(in srgb, var(--destructive, #ef4444) 14%, transparent);
-  border-color: color-mix(in srgb, var(--destructive, #ef4444) 34%, transparent);
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.7);
+  color: #fff1f2;
 }
 
 .fp-table-wrap {
-  border: 1px solid color-mix(in srgb, var(--color-border, var(--border, #334155)) 74%, transparent);
+  border: 1px solid var(--fp-border);
   border-radius: 8px;
   overflow: auto;
 }
@@ -153,20 +161,21 @@
 
 .fp-table th,
 .fp-table td {
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border, var(--border, #334155)) 56%, transparent);
+  border-bottom: 1px solid var(--fp-border);
+  color: var(--fp-text);
   padding: 10px;
   text-align: left;
   vertical-align: middle;
 }
 
 .fp-table th {
-  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 62%, transparent);
+  color: var(--fp-muted);
   font-size: 12px;
   font-weight: 600;
 }
 
 .fp-row:hover {
-  background: color-mix(in srgb, var(--muted, #334155) 24%, transparent);
+  background: rgba(148, 163, 184, 0.12);
 }
 
 .fp-name-static,
@@ -184,9 +193,9 @@
 }
 
 .fp-pill {
-  background: color-mix(in srgb, var(--muted, #334155) 45%, transparent);
+  background: rgba(148, 163, 184, 0.18);
   border-radius: 999px;
-  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 78%, transparent);
+  color: var(--fp-text);
   display: inline-flex;
   font-size: 12px;
   line-height: 1;
@@ -207,12 +216,12 @@
 }
 
 .fp-danger {
-  background: color-mix(in srgb, var(--destructive, #ef4444) 12%, transparent);
-  border-color: color-mix(in srgb, var(--destructive, #ef4444) 34%, transparent);
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.52);
 }
 
 .fp-empty {
-  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 62%, transparent);
+  color: var(--fp-muted);
   text-align: center;
 }
 
