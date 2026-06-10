@@ -17,6 +17,61 @@ ENV_ROOT_KEYS = (
     "HERMES_DATA_DIR",
 )
 
+SYSTEM_DIR_NAMES = {
+    "audio_cache",
+    "bin",
+    "cache",
+    "cron",
+    "home",
+    "hooks",
+    "image_cache",
+    "logs",
+    "memories",
+    "pairing",
+    "plans",
+    "platforms",
+    "plugins",
+    "sandboxes",
+    "sessions",
+    "skills",
+    "skins",
+    "workspace",
+}
+
+SYSTEM_FILE_NAMES = {
+    "auth.json",
+    "auth.lock",
+    "channel_directory.json",
+    "config.yaml",
+    "context_length_cache.yaml",
+    "gateway.lock",
+    "gateway.pid",
+    "gateway_state.json",
+    "kanban.db",
+    "kanban.db.init.lock",
+    "models_dev_cache.json",
+    "ollama_cloud_models_cache.json",
+    "provider_models_cache.json",
+    "SOUL.md",
+    "state.db",
+    "state.db-shm",
+    "state.db-wal",
+}
+
+SYSTEM_FILE_SUFFIXES = (
+    ".db",
+    ".db-shm",
+    ".db-wal",
+    ".lock",
+    ".pid",
+    ".sqlite",
+    ".sqlite3",
+)
+
+SYSTEM_FILE_PREFIXES = (
+    "config.yaml.bak-",
+)
+
 
 def _truthy(value: str | None) -> bool:
     return str(value or "").strip().lower() in {"1", "true", "yes", "on"}
@@ -92,6 +147,31 @@ def _entry_type(path: Path) -> str:
     return "other"
 
 
+def _is_system_entry(path: Path, root: Path) -> bool:
+    try:
+        rel = path.relative_to(root)
+    except ValueError:
+        return False
+
+    parts = rel.parts
+    if not parts:
+        return False
+
+    top = parts[0]
+    name = path.name
+    if top in SYSTEM_DIR_NAMES:
+        return True
+    if name in SYSTEM_FILE_NAMES:
+        return True
+    if any(name.startswith(prefix) for prefix in SYSTEM_FILE_PREFIXES):
+        return True
+    if any(name.endswith(suffix) for suffix in SYSTEM_FILE_SUFFIXES):
+        return True
+    if "cache" in name.lower() and path.is_file():
+        return True
+    return False
+
+
 def _file_item(path: Path, root: Path) -> dict[str, Any]:
     kind = _entry_type(path)
     try:
@@ -110,6 +190,7 @@ def _file_item(path: Path, root: Path) -> dict[str, Any]:
         "modified_at": modified_at,
         "downloadable": kind == "file",
         "deletable": kind in {"file", "directory", "symlink"},
+        "system": _is_system_entry(path, root),
     }
 
 
@@ -133,6 +214,7 @@ async def list_files(
     path: str = Query(default=""),
     q: str = Query(default=""),
     include_hidden: bool = Query(default=False),
+    include_system: bool = Query(default=False),
 ) -> dict[str, Any]:
     root = _root()
     target = _resolve_inside(path)
@@ -146,12 +228,16 @@ async def list_files(
     query = q.strip().lower()
     max_entries = max(1, int(os.environ.get("HERMES_FILE_PUBLISHER_MAX_ENTRIES", "500")))
     entries: list[dict[str, Any]] = []
+    hidden_system_count = 0
 
     try:
         for child in target.iterdir():
             if not include_hidden and child.name.startswith("."):
                 continue
             if query and query not in child.name.lower():
+                continue
+            if not include_system and _is_system_entry(child, root):
+                hidden_system_count += 1
                 continue
             entries.append(_file_item(child, root))
     except PermissionError as exc:
@@ -174,6 +260,7 @@ async def list_files(
         "items": entries,
         "truncated": truncated,
         "count": len(entries),
+        "hidden_system_count": hidden_system_count,
     }
 
 

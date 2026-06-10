@@ -17,6 +17,7 @@
 .fp-breadcrumbs {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -200,6 +201,12 @@
   font-size: 12px;
   line-height: 1;
   padding: 5px 8px;
+}
+
+.fp-system-pill {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  margin-left: 6px;
 }
 
 .fp-row-actions {

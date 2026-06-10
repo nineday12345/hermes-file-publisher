@@ -149,6 +149,8 @@
     const [parent, setParent] = useState("");
     const [query, setQuery] = useState("");
     const [includeHidden, setIncludeHidden] = useState(false);
+    const [includeSystem, setIncludeSystem] = useState(false);
+    const [hiddenSystemCount, setHiddenSystemCount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
@@ -164,7 +166,7 @@
     }, []);
 
     const loadFiles = useCallback(
-      async (nextPath, nextQuery, nextIncludeHidden) => {
+      async (nextPath, nextQuery, nextIncludeHidden, nextIncludeSystem) => {
         setLoading(true);
         setError("");
         try {
@@ -173,11 +175,13 @@
               path: nextPath,
               q: nextQuery,
               include_hidden: nextIncludeHidden ? "true" : "false",
+              include_system: nextIncludeSystem ? "true" : "false",
             })
           );
           setCurrentPath(data.path || "");
           setParent(data.parent || "");
           setItems(data.items || []);
+          setHiddenSystemCount(data.hidden_system_count || 0);
           if (data.truncated) {
             setNotice("当前目录文件较多，已按上限显示。");
           } else {
@@ -186,6 +190,7 @@
         } catch (err) {
           setError(errorToMessage(err));
           setItems([]);
+          setHiddenSystemCount(0);
         } finally {
           setLoading(false);
         }
@@ -195,15 +200,15 @@
 
     useEffect(() => {
       loadConfig();
-      loadFiles("", "", false);
+      loadFiles("", "", false, false);
     }, [loadConfig, loadFiles]);
 
     useEffect(() => {
       const timer = window.setTimeout(() => {
-        loadFiles(currentPath, query, includeHidden);
+        loadFiles(currentPath, query, includeHidden, includeSystem);
       }, 250);
       return () => window.clearTimeout(timer);
-    }, [query, includeHidden]);
+    }, [query, includeHidden, includeSystem]);
 
     async function downloadFile(item) {
       setError("");
@@ -254,7 +259,7 @@
           body: JSON.stringify({ path: item.path, confirm: true }),
         });
         setNotice("已删除：" + item.name);
-        loadFiles(currentPath, query, includeHidden);
+        loadFiles(currentPath, query, includeHidden, includeSystem);
       } catch (err) {
         setError(errorToMessage(err));
       }
@@ -263,6 +268,10 @@
     const breadcrumbs = breadcrumbTargets(currentPath);
     const configWarning =
       config && !config.exists ? "当前根目录不存在：" + config.root : "";
+    const emptyText =
+      !includeSystem && hiddenSystemCount > 0
+        ? "没有可发布文件，已隐藏 " + hiddenSystemCount + " 个系统/配置项"
+        : "没有文件";
 
     return h(
       "div",
@@ -279,7 +288,7 @@
         h(
           "div",
           { className: "fp-actions" },
-          h("button", { className: "fp-button", onClick: () => loadFiles(currentPath, query, includeHidden) }, "刷新")
+          h("button", { className: "fp-button", onClick: () => loadFiles(currentPath, query, includeHidden, includeSystem) }, "刷新")
         )
       ),
       h(
@@ -300,12 +309,22 @@
             onChange: (event) => setIncludeHidden(event.target.checked),
           }),
           "显示隐藏文件"
+        ),
+        h(
+          "label",
+          { className: "fp-check" },
+          h("input", {
+            type: "checkbox",
+            checked: includeSystem,
+            onChange: (event) => setIncludeSystem(event.target.checked),
+          }),
+          "显示系统/配置项"
         )
       ),
       h(
         "div",
         { className: "fp-breadcrumbs" },
-        h("button", { className: "fp-link", onClick: () => loadFiles("", query, includeHidden) }, "data"),
+        h("button", { className: "fp-link", onClick: () => loadFiles("", query, includeHidden, includeSystem) }, "data"),
         breadcrumbs.map((segment) =>
           h(
             React.Fragment,
@@ -313,7 +332,7 @@
             h("span", { className: "fp-separator" }, "/"),
             h(
               "button",
-              { className: "fp-link", onClick: () => loadFiles(segment.path, query, includeHidden) },
+              { className: "fp-link", onClick: () => loadFiles(segment.path, query, includeHidden, includeSystem) },
               segment.label
             )
           )
@@ -354,7 +373,7 @@
                 h(
                   "td",
                   null,
-                  h("button", { className: "fp-name", onClick: () => loadFiles(parent, query, includeHidden) }, "..")
+                  h("button", { className: "fp-name", onClick: () => loadFiles(parent, query, includeHidden, includeSystem) }, "..")
                 ),
                 h("td", null, "上级"),
                 h("td", null, "-"),
@@ -371,7 +390,7 @@
               h(
                 "tr",
                 null,
-                h("td", { colSpan: 5, className: "fp-empty" }, "没有文件")
+                h("td", { colSpan: 5, className: "fp-empty" }, emptyText)
               ),
             !loading &&
               items.map((item) =>
@@ -384,12 +403,17 @@
                     item.type === "directory"
                       ? h(
                           "button",
-                          { className: "fp-name fp-folder", onClick: () => loadFiles(item.path, query, includeHidden) },
+                          { className: "fp-name fp-folder", onClick: () => loadFiles(item.path, query, includeHidden, includeSystem) },
                           item.name
                         )
                       : h("span", { className: "fp-name-static" }, item.name)
                   ),
-                  h("td", null, h("span", { className: "fp-pill" }, typeLabel(item.type))),
+                  h(
+                    "td",
+                    null,
+                    h("span", { className: "fp-pill" }, typeLabel(item.type)),
+                    item.system && h("span", { className: "fp-pill fp-system-pill" }, "系统")
+                  ),
                   h("td", null, formatSize(item.size)),
                   h("td", null, formatTime(item.modified_at)),
                   h(

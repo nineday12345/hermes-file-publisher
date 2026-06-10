@@ -70,6 +70,8 @@ HERMES_FILE_PUBLISHER_RECURSIVE_DELETE=0
 
 打开 Hermes dashboard，进入“文件”标签页即可使用。插件不再额外要求访问令牌，认证交给 1Panel、反向代理或 Hermes dashboard 自身处理。
 
+页面默认隐藏 Hermes 内部系统/配置项，例如 `plugins`、`sessions`、`logs`、`cache`、`auth.json`、`config.yaml`、`state.db`、锁文件、PID 文件和模型缓存文件。需要维护时可以勾选“显示系统/配置项”临时查看。
+
 ## 排错
 
 如果页面报：
