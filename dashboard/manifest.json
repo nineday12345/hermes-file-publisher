@@ -1,0 +1,15 @@
+{
+  "name": "file-publisher",
+  "label": "文件",
+  "description": "Browse, download, copy links, and delete generated files on the server.",
+  "icon": "FileText",
+  "version": "1.0.0",
+  "tab": {
+    "path": "/files",
+    "position": "end",
+    "hidden": false
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}
