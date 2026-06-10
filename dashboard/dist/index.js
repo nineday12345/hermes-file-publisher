@@ -13,10 +13,18 @@
   }
 
   function errorToMessage(err) {
-    if (!err) return "未知错误";
-    if (typeof err === "string") return err;
-    if (err.detail) return String(err.detail);
-    if (err.message) return String(err.message);
+    let message = "";
+    if (!err) message = "未知错误";
+    else if (typeof err === "string") message = err;
+    else if (err.detail) message = String(err.detail);
+    else if (err.message) message = String(err.message);
+    else if (err.status || err.statusText) {
+      message = ["请求失败", err.status, err.statusText].filter(Boolean).join(" ");
+    }
+    if (message.includes("No such API endpoint") && message.includes("/api/plugins/file-publisher")) {
+      return "插件后端 API 未挂载。请重启 Hermes dashboard/容器；只扫描 manifest 不会加载 plugin_api.py。";
+    }
+    if (message) return message;
     if (err.status || err.statusText) {
       return ["请求失败", err.status, err.statusText].filter(Boolean).join(" ");
     }

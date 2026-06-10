@@ -70,6 +70,20 @@ HERMES_FILE_PUBLISHER_RECURSIVE_DELETE=0
 
 打开 Hermes dashboard，进入“文件”标签页即可使用。插件不再额外要求访问令牌，认证交给 1Panel、反向代理或 Hermes dashboard 自身处理。
 
+## 排错
+
+如果页面报：
+
+```text
+404: {"detail":"No such API endpoint: /api/plugins/file-publisher/files"}
+```
+
+说明前端 manifest 已加载，但 `dashboard/plugin_api.py` 没有挂载到 dashboard 后端。处理方法：
+
+1. 确认插件文件在容器内是 `~/.hermes/plugins/file-publisher/dashboard/plugin_api.py` 或 Hermes 实际插件目录下的同等路径。
+2. 重启 Hermes dashboard 或整个 Hermes 容器。`扫描 manifest` 只能刷新前端，不会加载新的 Python API 路由。
+3. 查看 `~/.hermes/logs/errors.log`，搜索 `file-publisher`，如果 `plugin_api.py` 导入失败会记录在这里。
+
 ## 安全说明
 
 插件后端会把所有路径限制在配置根目录内，阻止 `../` 路径穿越，也不会删除根目录本身。
