@@ -43,7 +43,6 @@ Docker/1Panel 部署时，把目录放到容器内 Hermes home 对应的插件�
 
 ```env
 HERMES_FILE_PUBLISHER_ROOT=/data
-HERMES_FILE_PUBLISHER_TOKEN=change-this-to-a-long-random-token
 ```
 
 可选项：
@@ -68,7 +67,7 @@ HERMES_FILE_PUBLISHER_RECURSIVE_DELETE=0
 
 ## 使用
 
-打开 Hermes dashboard，进入“文件”标签页。若设置了 `HERMES_FILE_PUBLISHER_TOKEN`，在右上角输入访问令牌并点击“解锁”。
+打开 Hermes dashboard，进入“文件”标签页即可使用。插件不再额外要求访问令牌，认证交给 1Panel、反向代理或 Hermes dashboard 自身处理。
 
 ## 安全说明
 
@@ -77,6 +76,5 @@ HERMES_FILE_PUBLISHER_RECURSIVE_DELETE=0
 如果 dashboard 通过公网域名暴露，请务必至少启用一种保护：
 
 - 在 1Panel/Nginx/Caddy 反代层开启 Basic Auth、OAuth 或访问控制。
-- 设置 `HERMES_FILE_PUBLISHER_TOKEN`，避免插件 API 被未授权访问。
 
 不建议把 Hermes dashboard 的原始端口直接暴露到公网。

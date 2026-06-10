@@ -1,4 +1,5 @@
 .fp-page {
+  color: var(--color-foreground, var(--foreground, #f4f4f5));
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -29,7 +30,7 @@
 }
 
 .fp-root {
-  color: color-mix(in srgb, var(--foreground, #e5e7eb) 70%, transparent);
+  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 70%, transparent);
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
   max-width: min(64vw, 760px);
@@ -46,10 +47,10 @@
 }
 
 .fp-input {
-  background: color-mix(in srgb, var(--background, #020617) 86%, white);
-  border: 1px solid color-mix(in srgb, var(--border, #334155) 80%, transparent);
+  background: color-mix(in srgb, var(--color-card, var(--background, #020617)) 86%, white);
+  border: 1px solid color-mix(in srgb, var(--color-border, var(--border, #334155)) 80%, transparent);
   border-radius: 8px;
-  color: var(--foreground, #e5e7eb);
+  color: var(--color-foreground, var(--foreground, #e5e7eb));
   font-size: 13px;
   height: 34px;
   outline: none;
@@ -57,11 +58,7 @@
 }
 
 .fp-input:focus {
-  border-color: var(--ring, #38bdf8);
-}
-
-.fp-token {
-  width: 150px;
+  border-color: var(--color-ring, var(--ring, #38bdf8));
 }
 
 .fp-search {
@@ -84,7 +81,7 @@
   background: color-mix(in srgb, var(--primary, #14b8a6) 16%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary, #14b8a6) 46%, transparent);
   border-radius: 8px;
-  color: var(--foreground, #e5e7eb);
+  color: var(--color-foreground, var(--foreground, #e5e7eb));
   display: inline-flex;
   height: 34px;
   justify-content: center;
@@ -98,7 +95,7 @@
 
 .fp-check {
   align-items: center;
-  color: color-mix(in srgb, var(--foreground, #e5e7eb) 82%, transparent);
+  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 82%, transparent);
   display: inline-flex;
   font-size: 13px;
   gap: 6px;
@@ -106,7 +103,7 @@
 }
 
 .fp-breadcrumbs {
-  border-bottom: 1px solid color-mix(in srgb, var(--border, #334155) 72%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border, var(--border, #334155)) 72%, transparent);
   flex-wrap: wrap;
   padding-bottom: 8px;
 }
@@ -124,14 +121,14 @@
 }
 
 .fp-separator {
-  color: color-mix(in srgb, var(--foreground, #e5e7eb) 40%, transparent);
+  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 40%, transparent);
 }
 
 .fp-message {
   background: color-mix(in srgb, var(--primary, #14b8a6) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary, #14b8a6) 24%, transparent);
   border-radius: 8px;
-  color: var(--foreground, #e5e7eb);
+  color: var(--color-foreground, var(--foreground, #e5e7eb));
   font-size: 13px;
   padding: 9px 10px;
 }
@@ -142,7 +139,7 @@
 }
 
 .fp-table-wrap {
-  border: 1px solid color-mix(in srgb, var(--border, #334155) 74%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border, var(--border, #334155)) 74%, transparent);
   border-radius: 8px;
   overflow: auto;
 }
@@ -156,14 +153,14 @@
 
 .fp-table th,
 .fp-table td {
-  border-bottom: 1px solid color-mix(in srgb, var(--border, #334155) 56%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border, var(--border, #334155)) 56%, transparent);
   padding: 10px;
   text-align: left;
   vertical-align: middle;
 }
 
 .fp-table th {
-  color: color-mix(in srgb, var(--foreground, #e5e7eb) 62%, transparent);
+  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 62%, transparent);
   font-size: 12px;
   font-weight: 600;
 }
@@ -189,7 +186,7 @@
 .fp-pill {
   background: color-mix(in srgb, var(--muted, #334155) 45%, transparent);
   border-radius: 999px;
-  color: color-mix(in srgb, var(--foreground, #e5e7eb) 78%, transparent);
+  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 78%, transparent);
   display: inline-flex;
   font-size: 12px;
   line-height: 1;
@@ -215,7 +212,7 @@
 }
 
 .fp-empty {
-  color: color-mix(in srgb, var(--foreground, #e5e7eb) 62%, transparent);
+  color: color-mix(in srgb, var(--color-foreground, var(--foreground, #e5e7eb)) 62%, transparent);
   text-align: center;
 }
 
@@ -227,8 +224,7 @@
   }
 
   .fp-actions,
-  .fp-search,
-  .fp-token {
+  .fp-search {
     width: 100%;
   }
 

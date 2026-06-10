@@ -1,44 +1,28 @@
 (function () {
+  "use strict";
+
   const SDK = window.__HERMES_PLUGIN_SDK__;
   const React = SDK.React;
   const hooks = SDK.hooks;
 
   const API_BASE = "/api/plugins/file-publisher";
-  const STORAGE_TOKEN_KEY = "file-publisher-token";
 
   function h(type, props) {
     const children = Array.prototype.slice.call(arguments, 2);
     return React.createElement(type, props || null, ...children);
   }
 
-  function getStoredToken() {
-    try {
-      return window.sessionStorage.getItem(STORAGE_TOKEN_KEY) || "";
-    } catch (_err) {
-      return "";
-    }
-  }
-
-  function setStoredToken(value) {
-    try {
-      if (value) {
-        window.sessionStorage.setItem(STORAGE_TOKEN_KEY, value);
-      } else {
-        window.sessionStorage.removeItem(STORAGE_TOKEN_KEY);
-      }
-    } catch (_err) {
-      /* sessionStorage can be unavailable in hardened browsers. */
-    }
-  }
-
   async function requestJSON(path, options) {
+    const authedPath = API_BASE + path;
+    if (typeof SDK.fetchJSON === "function") {
+      return SDK.fetchJSON(authedPath, options);
+    }
+
     const headers = new Headers((options && options.headers) || {});
-    const token = getStoredToken();
-    if (token) headers.set("X-File-Publisher-Token", token);
     if (options && options.body && !headers.has("Content-Type")) {
       headers.set("Content-Type", "application/json");
     }
-    const response = await fetch(API_BASE + path, {
+    const response = await fetch(authedPath, {
       ...options,
       headers,
       credentials: "same-origin",
@@ -56,7 +40,19 @@
     return response.json();
   }
 
-  function joinUrl(path, query) {
+  async function requestFile(path, options) {
+    const url = API_BASE + path;
+    const headers = new Headers((options && options.headers) || {});
+
+    const fetcher = typeof SDK.authedFetch === "function" ? SDK.authedFetch : fetch;
+    return fetcher(url, {
+      ...options,
+      headers,
+      credentials: "same-origin",
+    });
+  }
+
+  function buildApiPath(path, query) {
     const params = new URLSearchParams();
     Object.keys(query || {}).forEach((key) => {
       const value = query[key];
@@ -65,7 +61,11 @@
       }
     });
     const qs = params.toString();
-    return API_BASE + path + (qs ? "?" + qs : "");
+    return path + (qs ? "?" + qs : "");
+  }
+
+  function joinUrl(path, query) {
+    return API_BASE + buildApiPath(path, query);
   }
 
   function formatSize(bytes) {
@@ -129,7 +129,6 @@
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
-    const [tokenInput, setTokenInput] = useState(getStoredToken());
 
     const loadConfig = useCallback(async () => {
       try {
@@ -147,11 +146,11 @@
         setError("");
         try {
           const data = await requestJSON(
-            joinUrl("/files", {
+            buildApiPath("/files", {
               path: nextPath,
               q: nextQuery,
               include_hidden: nextIncludeHidden ? "true" : "false",
-            }).replace(API_BASE, "")
+            })
           );
           setCurrentPath(data.path || "");
           setParent(data.parent || "");
@@ -183,23 +182,11 @@
       return () => window.clearTimeout(timer);
     }, [query, includeHidden]);
 
-    function applyToken() {
-      setStoredToken(tokenInput.trim());
-      setNotice(tokenInput.trim() ? "访问令牌已保存到当前浏览器会话。" : "访问令牌已清除。");
-      loadConfig();
-      loadFiles(currentPath, query, includeHidden);
-    }
-
     async function downloadFile(item) {
       setError("");
       try {
         const headers = new Headers();
-        const token = getStoredToken();
-        if (token) headers.set("X-File-Publisher-Token", token);
-        const response = await fetch(joinUrl("/download", { path: item.path }), {
-          headers,
-          credentials: "same-origin",
-        });
+        const response = await requestFile(buildApiPath("/download", { path: item.path }), { headers });
         if (!response.ok) {
           let message = response.statusText;
           try {
@@ -267,14 +254,6 @@
         h(
           "div",
           { className: "fp-actions" },
-          h("input", {
-            className: "fp-input fp-token",
-            type: "password",
-            placeholder: "访问令牌",
-            value: tokenInput,
-            onChange: (event) => setTokenInput(event.target.value),
-          }),
-          h("button", { className: "fp-button", onClick: applyToken }, "解锁"),
           h("button", { className: "fp-button", onClick: () => loadFiles(currentPath, query, includeHidden) }, "刷新")
         )
       ),

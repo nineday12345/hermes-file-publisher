@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 import os
-import secrets
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 
 router = APIRouter()
@@ -82,24 +81,6 @@ def _resolve_inside(raw_path: str | None, *, follow_final_symlink: bool = True) 
     return target
 
 
-def _optional_token() -> str:
-    return os.environ.get("HERMES_FILE_PUBLISHER_TOKEN", "").strip()
-
-
-def _require_plugin_token(request: Request) -> None:
-    expected = _optional_token()
-    if not expected:
-        return
-
-    provided = (
-        request.headers.get("x-file-publisher-token")
-        or request.query_params.get("token")
-        or ""
-    ).strip()
-    if not secrets.compare_digest(provided, expected):
-        raise HTTPException(status_code=401, detail="Invalid file publisher token")
-
-
 def _entry_type(path: Path) -> str:
     if path.is_symlink():
         return "symlink"
@@ -136,13 +117,11 @@ def _sort_key(item: dict[str, Any]) -> tuple[int, str]:
 
 
 @router.get("/config")
-async def config(request: Request) -> dict[str, Any]:
-    _require_plugin_token(request)
+async def config() -> dict[str, Any]:
     root = _root()
     return {
         "root": str(root),
         "exists": root.exists(),
-        "token_required": bool(_optional_token()),
         "recursive_delete": _truthy(os.environ.get("HERMES_FILE_PUBLISHER_RECURSIVE_DELETE")),
         "max_entries": int(os.environ.get("HERMES_FILE_PUBLISHER_MAX_ENTRIES", "500")),
     }
@@ -150,12 +129,10 @@ async def config(request: Request) -> dict[str, Any]:
 
 @router.get("/files")
 async def list_files(
-    request: Request,
     path: str = Query(default=""),
     q: str = Query(default=""),
     include_hidden: bool = Query(default=False),
 ) -> dict[str, Any]:
-    _require_plugin_token(request)
     root = _root()
     target = _resolve_inside(path)
     if not root.exists():
@@ -201,10 +178,8 @@ async def list_files(
 
 @router.get("/download")
 async def download(
-    request: Request,
     path: str = Query(..., min_length=1),
 ) -> FileResponse:
-    _require_plugin_token(request)
     target = _resolve_inside(path)
     if not target.exists():
         raise HTTPException(status_code=404, detail="File not found")
@@ -218,8 +193,7 @@ async def download(
 
 
 @router.delete("/files")
-async def delete_file(request: Request, payload: dict[str, Any]) -> dict[str, Any]:
-    _require_plugin_token(request)
+async def delete_file(payload: dict[str, Any]) -> dict[str, Any]:
     target = _resolve_inside(str(payload.get("path") or ""), follow_final_symlink=False)
     confirm = bool(payload.get("confirm"))
     if not confirm:
